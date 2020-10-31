@@ -32,13 +32,17 @@ public class AnimationController : MonoBehaviour
         animator.SetTrigger(ANIM_ATTACK);
     }
 
-    public void UpdateVelocity(float xVel, float zVel)
+    public void UpdateVelocity(Vector3 velocity)
     {
-        //expose velocity to animator
-        animator.SetFloat(ANIM_XVEL, xVel);
-        animator.SetFloat(ANIM_ZVEL, zVel);
 
-        if(Mathf.Max(Mathf.Abs(xVel), Mathf.Abs(zVel)) > walkingThreshold)
+        var fwdDotVelocity = Vector3.Dot(transform.forward, velocity);
+        var rightDotVelocity = Vector3.Dot(transform.right, velocity);
+
+        //expose velocity to animator
+        animator.SetFloat(ANIM_XVEL, rightDotVelocity);
+        animator.SetFloat(ANIM_ZVEL, fwdDotVelocity);
+
+        if(Mathf.Max(Mathf.Abs(velocity.x), Mathf.Abs(velocity.z)) > walkingThreshold)
         {
             animator.SetBool(ANIM_ISWALKING, true);
         }

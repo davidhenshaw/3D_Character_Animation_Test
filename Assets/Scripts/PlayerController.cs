@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         velocity = moveCtrl.Move(direction);
-        animCtrl.UpdateVelocity(velocity.x, velocity.z);
+        animCtrl.UpdateVelocity(velocity);
     }
 
     public void OnHitLanded()

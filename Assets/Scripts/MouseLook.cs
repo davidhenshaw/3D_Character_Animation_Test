@@ -22,18 +22,14 @@ public class MouseLook : MonoBehaviour
     {
         //If the application tries to quit, release the mouse
         Application.quitting += ReleaseMouse;
-        //CaptureMouse();        
+        CaptureMouse();        
         controls = player.controls;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(Cursor.lockState == CursorLockMode.Locked)
-        {
-            Move();
-        }
-        else
+        if(Cursor.lockState != CursorLockMode.Locked)
         {
             if(Mouse.current.leftButton.wasPressedThisFrame)
             {
@@ -44,6 +40,14 @@ public class MouseLook : MonoBehaviour
         if(Keyboard.current.escapeKey.wasReleasedThisFrame)
         {
             ReleaseMouse();
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            Move();
         }
     }
 
