@@ -34,7 +34,8 @@ public class AnimationController : MonoBehaviour
 
     public void UpdateVelocity(Vector3 velocity)
     {
-
+        //Calculate dot product of movement vector and player's facing direction
+        // in order to accurately show animator the correct walking direction
         var fwdDotVelocity = Vector3.Dot(transform.forward, velocity);
         var rightDotVelocity = Vector3.Dot(transform.right, velocity);
 

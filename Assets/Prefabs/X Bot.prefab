@@ -2238,9 +2238,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e01041811f4c3d74c8aad6e9c2a79fc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSensitivity: 64
+  verticalSensitivity: 64
+  horizontalSensitivity: 50
   player: {fileID: 9127489731648099632}
   target: {fileID: 7150134818628873249}
+  maxVerticalAngle: 10
+  minVerticalAngle: -30
 --- !u!1 &8122389304367747911
 GameObject:
   m_ObjectHideFlags: 0

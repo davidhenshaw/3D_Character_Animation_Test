@@ -40,9 +40,6 @@ public class PlayerController : MonoBehaviour
         }  
 
         direction = controls.Player.Movement.ReadValue<Vector2>();
-        var mouseLook = controls.Player.CameraLook.ReadValue<Vector2>();
-
-        //Debug.Log(mouseLook.ToString());
     }
 
     private void FixedUpdate()

@@ -1127,11 +1127,6 @@ PrefabInstance:
       propertyPath: mouseSensitivity
       value: 75
       objectReference: {fileID: 0}
-    - target: {fileID: 1638654632994145495, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
-        type: 3}
-      propertyPath: horizontalSensitivity
-      value: 100
-      objectReference: {fileID: 0}
     - target: {fileID: 1884412447454019117, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

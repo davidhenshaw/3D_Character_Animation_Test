@@ -12,6 +12,8 @@ public class MouseLook : MonoBehaviour
     float mouseY;
     [SerializeField] PlayerController player;
     [SerializeField] Transform target;
+    [SerializeField] float maxVerticalAngle = 90;
+    [SerializeField] float minVerticalAngle = -90;
 
     private void Awake()
     {
@@ -59,7 +61,7 @@ public class MouseLook : MonoBehaviour
         mouseY -= mouseDelta.y * horizontalSensitivity * Time.deltaTime;
 
         // rotation must be clamped so you can't look up and behind yourself
-        mouseY = Mathf.Clamp(mouseY, -90f, 90f);
+        mouseY = Mathf.Clamp(mouseY, minVerticalAngle, maxVerticalAngle);
         //rotate camera to face player
         
 
