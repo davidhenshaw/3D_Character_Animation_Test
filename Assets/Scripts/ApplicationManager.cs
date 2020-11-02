@@ -6,6 +6,9 @@ using UnityEngine;
 public class ApplicationManager : MonoBehaviour
 {
 
+    float quitTimer;
+    [SerializeField] float quitTime = 2;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,7 +30,23 @@ public class ApplicationManager : MonoBehaviour
         if (Keyboard.current.escapeKey.wasReleasedThisFrame)
         {
             ReleaseMouse();
+            quitTimer = 0;
         }
+
+        if(Keyboard.current.escapeKey.isPressed)
+        {
+            quitTimer += Time.deltaTime;
+
+            if(quitTimer >= quitTime)
+            {
+                QuitApplication();
+            }
+        }
+    }
+
+    void QuitApplication()
+    {
+        Application.Quit();
     }
 
     void CaptureMouse()
