@@ -22,12 +22,6 @@ public class AttackController : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     void OnHitLanded()
     {
         player.OnHitLanded();

@@ -13,7 +13,6 @@ public class MoveController : MonoBehaviour
     [SerializeField] public float minWalkSpeed = 0.2f;
     [SerializeField] public float deadZone = 0.03f;
 
-
     PlayerController _pc;
     CharacterController _charController;
     Rigidbody _rigidbody;
@@ -62,8 +61,6 @@ public class MoveController : MonoBehaviour
         xVel = Mathf.Clamp(xVel, -maxWalkSpeed, maxWalkSpeed);
         zVel = Mathf.Clamp(zVel, -maxWalkSpeed, maxWalkSpeed);
 
-        
-
         //var currVelocity = new Vector3(xVel, _rigidbody.velocity.y, zVel);
 
         var currVelocity = _camera.transform.forward * zVel + _camera.transform.right * xVel;
@@ -74,8 +71,14 @@ public class MoveController : MonoBehaviour
         return currVelocity;
     }
 
-    public void SetRotation(float degrees)
+    public bool IsMoving()
     {
-        rotation = degrees;
+        return Mathf.Abs(xVel) > Mathf.Epsilon || Mathf.Abs(zVel) > Mathf.Epsilon;
+    }
+
+    public void SetForwardDirection(Vector3 direction)
+    {
+        Vector3 fwdEuler = Quaternion.LookRotation(direction, Vector3.up).eulerAngles;
+        transform.rotation = Quaternion.Euler(0, fwdEuler.y, 0);
     }
 }

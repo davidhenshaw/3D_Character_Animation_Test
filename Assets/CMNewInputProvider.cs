@@ -10,6 +10,8 @@ public class CMNewInputProvider : MonoBehaviour, AxisState.IInputAxisProvider
     CinemachineOrbitalTransposer cmOrbital;
     AxisState axisState;
     [SerializeField] PlayerController playerCtrl;
+    [SerializeField] bool invertXAxis;
+    [SerializeField] bool invertYAxis;
     InputMaster controls;
 
     private void Awake()
@@ -27,19 +29,27 @@ public class CMNewInputProvider : MonoBehaviour, AxisState.IInputAxisProvider
 
     public float GetAxisValue(int axis)
     {
-        var input = controls.Player.CameraLook.ReadValue<Vector2>();
+        Vector2 input = Vector2.zero;
+
+        if(controls != null)
+        {
+            input = controls.Player.CameraLook.ReadValue<Vector2>();
+            input.Normalize();
+        }
+
+
         float value = 0;
 
         switch(axis)
         {
             case 0:
                 {
-                    value = input.x;
+                    value = invertXAxis ? input.x * -1 : input.x;
                     break;
                 }
             case 1:
                 {
-                    value = input.y;
+                    value = invertYAxis ? input.y * -1 : input.y;
                     break;
                 }
             case 2:
@@ -51,9 +61,5 @@ public class CMNewInputProvider : MonoBehaviour, AxisState.IInputAxisProvider
 
         return value;
     }
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
 }

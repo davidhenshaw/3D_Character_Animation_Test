@@ -10,7 +10,8 @@ public class PlayerController : MonoBehaviour
     public event Action stoppedMoving;
 
     Vector3 velocity;
-    Vector2 direction;
+    Vector2 inputDir;
+    [SerializeField] Camera targetCamera;
     [SerializeField] MoveController moveCtrl;
     [SerializeField] AnimationController animCtrl;
     [SerializeField] AttackController attackCtrl;
@@ -20,6 +21,12 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         controls = new InputMaster();
+    }
+
+    private void Start()
+    {
+        if(targetCamera == null)
+            targetCamera = Camera.main;        
     }
 
     private void OnEnable()
@@ -39,13 +46,17 @@ public class PlayerController : MonoBehaviour
             animCtrl.Attack();
         }  
 
-        direction = controls.Player.Movement.ReadValue<Vector2>();
+        inputDir = controls.Player.Movement.ReadValue<Vector2>();
     }
 
     private void FixedUpdate()
     {
-        velocity = moveCtrl.Move(direction);
-        animCtrl.UpdateVelocity(velocity);
+        velocity = moveCtrl.Move(inputDir);
+
+        if(moveCtrl.IsMoving())
+            moveCtrl.SetForwardDirection(targetCamera.transform.forward);
+
+        animCtrl.UpdateVelocity(velocity);      
     }
 
     public void OnHitLanded()
