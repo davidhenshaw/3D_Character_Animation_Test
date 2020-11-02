@@ -1,0 +1,59 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Cinemachine;
+using UnityEngine.InputSystem;
+
+public class CMNewInputProvider : MonoBehaviour, AxisState.IInputAxisProvider
+{
+    CinemachineFreeLook cmFreeLook;
+    CinemachineOrbitalTransposer cmOrbital;
+    AxisState axisState;
+    [SerializeField] PlayerController playerCtrl;
+    InputMaster controls;
+
+    private void Awake()
+    {
+        cmFreeLook = GetComponent<CinemachineFreeLook>();
+        cmFreeLook.m_XAxis.SetInputAxisProvider(0, this);
+        cmFreeLook.m_YAxis.SetInputAxisProvider(1, this);
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        controls = playerCtrl.controls;
+    }
+
+    public float GetAxisValue(int axis)
+    {
+        var input = controls.Player.CameraLook.ReadValue<Vector2>();
+        float value = 0;
+
+        switch(axis)
+        {
+            case 0:
+                {
+                    value = input.x;
+                    break;
+                }
+            case 1:
+                {
+                    value = input.y;
+                    break;
+                }
+            case 2:
+                {
+                    Debug.LogError("Cannot get value for axis \"2\". " + name + " does not support Z-Axis inputs");
+                    break;
+                }
+        }
+
+        return value;
+    }
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
