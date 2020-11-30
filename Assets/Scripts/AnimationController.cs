@@ -11,6 +11,7 @@ public class AnimationController : MonoBehaviour
     int ANIM_ZVEL = Animator.StringToHash("zVel");
     int ANIM_ATTACK = Animator.StringToHash("Attack");
     int ANIM_ISWALKING = Animator.StringToHash("isWalking");
+    int ANIM_SWORDATK_L = Animator.StringToHash("SwordAtk_L");
 
     float walkingThreshold = 0.05f;
     [SerializeField] float hitStopDuration = 0.2f;
@@ -32,6 +33,11 @@ public class AnimationController : MonoBehaviour
         animator.SetTrigger(ANIM_ATTACK);
     }
 
+    public void AttackSword_L()
+    {
+        animator.SetTrigger(ANIM_SWORDATK_L);
+    }
+
     public void UpdateVelocity(Vector3 velocity)
     {
         //Calculate dot product of movement vector and player's facing direction
@@ -43,7 +49,7 @@ public class AnimationController : MonoBehaviour
         animator.SetFloat(ANIM_XVEL, rightDotVelocity);
         animator.SetFloat(ANIM_ZVEL, fwdDotVelocity);
 
-        if(Mathf.Max(Mathf.Abs(velocity.x), Mathf.Abs(velocity.z)) > walkingThreshold)
+        if (Mathf.Max(Mathf.Abs(velocity.x), Mathf.Abs(velocity.z)) > walkingThreshold)
         {
             animator.SetBool(ANIM_ISWALKING, true);
         }

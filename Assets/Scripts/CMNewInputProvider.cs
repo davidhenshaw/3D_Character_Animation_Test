@@ -7,7 +7,6 @@ using UnityEngine.InputSystem;
 public class CMNewInputProvider : MonoBehaviour, AxisState.IInputAxisProvider
 {
     CinemachineFreeLook cmFreeLook;
-    CinemachineOrbitalTransposer cmOrbital;
     AxisState axisState;
     [SerializeField] PlayerController playerCtrl;
     [SerializeField] bool invertXAxis;

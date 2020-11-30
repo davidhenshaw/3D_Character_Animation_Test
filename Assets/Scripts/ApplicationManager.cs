@@ -5,18 +5,15 @@ using UnityEngine;
 
 public class ApplicationManager : MonoBehaviour
 {
-
     float quitTimer;
     [SerializeField] float quitTime = 2;
 
-    // Start is called before the first frame update
     void Start()
     {
         Application.quitting += ReleaseMouse;
         CaptureMouse();
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Cursor.lockState != CursorLockMode.Locked)

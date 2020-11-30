@@ -39,14 +39,20 @@ public class PlayerController : MonoBehaviour
         controls.Disable();
     }
 
+    //Player input is read here
     private void Update()
     {
+        inputDir = controls.Player.Movement.ReadValue<Vector2>();
+
         if(Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             animCtrl.Attack();
         }  
 
-        inputDir = controls.Player.Movement.ReadValue<Vector2>();
+        if(Keyboard.current.eKey.wasPressedThisFrame)
+        {
+            animCtrl.AttackSword_L();
+        }
     }
 
     private void FixedUpdate()
