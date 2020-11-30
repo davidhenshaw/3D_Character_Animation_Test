@@ -22,7 +22,8 @@ public class Hitbox : MonoBehaviour
         {
             hurtbox.TakeDamage(damage);
             hitLanded?.Invoke();
-            VFXManager.current.SpawnHitVFX(transform.position);
+            Vector3 contactPoint = other.ClosestPoint(transform.position);
+            VFXManager.current.SpawnHitVFX(contactPoint);
         }
     }
 }
