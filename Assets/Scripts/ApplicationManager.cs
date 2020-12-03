@@ -11,7 +11,7 @@ public class ApplicationManager : MonoBehaviour
     void Start()
     {
         Application.quitting += ReleaseMouse;
-        CaptureMouse();
+        //CaptureMouse();
     }
 
     void Update()
