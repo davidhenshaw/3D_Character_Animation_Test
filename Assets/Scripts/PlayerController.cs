@@ -53,6 +53,8 @@ public class PlayerController : MonoBehaviour
         {
             animCtrl.AttackSword_L();
         }
+
+        moveCtrl.isRunning = Keyboard.current.leftShiftKey.isPressed;
     }
 
     private void FixedUpdate()

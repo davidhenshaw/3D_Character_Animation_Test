@@ -33,7 +33,7 @@ public class CMNewInputProvider : MonoBehaviour, AxisState.IInputAxisProvider
         if(controls != null)
         {
             input = controls.Player.CameraLook.ReadValue<Vector2>();
-            input.Normalize();
+            //input.Normalize();
         }
 
 
