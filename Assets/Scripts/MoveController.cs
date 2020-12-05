@@ -11,7 +11,7 @@ public class MoveController : MonoBehaviour
     [SerializeField] public float decelRate = 2;
     [SerializeField] public float maxWalkSpeed = 2;
     [SerializeField] public float minWalkSpeed = 0.2f;
-    [SerializeField] public float maxRunSpeed = 4;
+    [SerializeField] public float maxRunSpeed = 6;
     [SerializeField] public float deadZone = 0.03f;
 
     PlayerController _pc;
@@ -29,15 +29,40 @@ public class MoveController : MonoBehaviour
         _collider = GetComponent<Collider>();
     }
 
+    float prevXVel = 0;
+    float prevZVel = 0;
+    private void Update()
+    {
+        //UpdateIsRunning();
+    }
+
+    private void UpdateIsRunning()
+    {
+        if( xVel <= maxWalkSpeed && prevXVel > maxWalkSpeed
+            && zVel <= maxWalkSpeed)
+        {
+            isRunning = false;
+        }
+
+        if (zVel <= maxWalkSpeed && prevZVel > maxWalkSpeed
+            && xVel <= maxWalkSpeed)
+        {
+            isRunning = false;
+        }
+
+        prevXVel = xVel;
+        prevZVel = zVel;
+    }
+
     public Vector3 Move(Vector2 direction)
     {
-        //No directional input? start deceleration
+        
         if (Mathf.Abs(direction.x) > deadZone)
         {
             xVel += direction.x * (accelRate * Time.deltaTime);
         }
         else
-        {
+        {//No directional input? start deceleration
             xVel -= Mathf.Sign(xVel) * decelRate * Time.deltaTime;
 
             if (Mathf.Abs(xVel) <= minWalkSpeed)
@@ -78,5 +103,10 @@ public class MoveController : MonoBehaviour
     {
         Vector3 fwdEuler = Quaternion.LookRotation(direction, Vector3.up).eulerAngles;
         transform.rotation = Quaternion.Euler(0, fwdEuler.y, 0);
+    }
+
+    public Vector3 GetVelocity()
+    {
+        return _rigidbody.velocity;
     }
 }
