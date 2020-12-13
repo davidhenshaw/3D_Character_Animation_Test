@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
     public event Action stoppedMoving;
 
     Vector3 velocity;
-    Vector2 inputDir;
+    Vector2 inputAxis;
     [SerializeField] Camera targetCamera;
     [SerializeField] MoveController moveCtrl;
     [SerializeField] AnimationController animCtrl;
@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
     //Player input is read here
     private void Update()
     {
-        inputDir = controls.Player.Movement.ReadValue<Vector2>();
+        inputAxis = controls.Player.Movement.ReadValue<Vector2>();
 
         if(Keyboard.current.spaceKey.wasPressedThisFrame)
         {
@@ -59,10 +59,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        velocity = moveCtrl.Move(inputDir);
+        velocity = moveCtrl.Move(inputAxis);
 
-        if(moveCtrl.IsMoving())
-            moveCtrl.SetForwardDirection(targetCamera.transform.forward);
+        moveCtrl.UpdateRotation(inputAxis);
 
         animCtrl.UpdateVelocity(velocity);      
     }

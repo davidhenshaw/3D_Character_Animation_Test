@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class MoveController : MonoBehaviour
 {
-    float xVel;
-    float zVel;
+    float currSpeed;
     public bool isRunning;
     [SerializeField] public float accelRate = 4;
     [SerializeField] public float decelRate = 2;
@@ -13,96 +12,76 @@ public class MoveController : MonoBehaviour
     [SerializeField] public float minWalkSpeed = 0.2f;
     [SerializeField] public float maxRunSpeed = 6;
     [SerializeField] public float deadZone = 0.03f;
+    [SerializeField] float turnRate = 0.005f;
 
-    PlayerController _pc;
-    CharacterController _charController;
+    [SerializeField] Transform lookDir;
+    [SerializeField] Transform lockOnTarget;
+    float currTurnVelocity;
+    float targetAngle;
+    float currAngle;
+    Vector3 fwdDir;
+
     Rigidbody _rigidbody;
     Collider _collider;
-    Camera _camera;
 
     private void Awake()
     {
-        _camera = FindObjectOfType<Camera>();
-        _pc = GetComponent<PlayerController>();
-        _charController = GetComponent<CharacterController>();
+        if(lookDir == null)
+            lookDir = Camera.main.transform;
+
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
     }
 
-    float prevXVel = 0;
-    float prevZVel = 0;
-    private void Update()
+    public void SetLockOnTarget(Transform target)
     {
-        //UpdateIsRunning();
+        lockOnTarget = target;
     }
 
-    private void UpdateIsRunning()
+    public Vector3 Move(Vector3 inputAxis)
     {
-        if( xVel <= maxWalkSpeed && prevXVel > maxWalkSpeed
-            && zVel <= maxWalkSpeed)
+        // if the player inputs any direction, the character speed increases
+        // if no input is detected, the speed decreases toward zero
+        if (inputAxis.magnitude > deadZone)
         {
-            isRunning = false;
-        }
-
-        if (zVel <= maxWalkSpeed && prevZVel > maxWalkSpeed
-            && xVel <= maxWalkSpeed)
-        {
-            isRunning = false;
-        }
-
-        prevXVel = xVel;
-        prevZVel = zVel;
-    }
-
-    public Vector3 Move(Vector2 direction)
-    {
-        
-        if (Mathf.Abs(direction.x) > deadZone)
-        {
-            xVel += direction.x * (accelRate * Time.deltaTime);
-        }
-        else
-        {//No directional input? start deceleration
-            xVel -= Mathf.Sign(xVel) * decelRate * Time.deltaTime;
-
-            if (Mathf.Abs(xVel) <= minWalkSpeed)
-                xVel = 0;
-        }
-
-        if (Mathf.Abs(direction.y) > deadZone)
-        {
-            zVel += direction.y * (accelRate * Time.deltaTime);
+            currSpeed += accelRate * Time.deltaTime;
         }
         else
         {
-            zVel -= Mathf.Sign(zVel) * decelRate * Time.deltaTime;
-
-            if (Mathf.Abs(zVel) <= minWalkSpeed)
-                zVel = 0;
+            currSpeed -= decelRate * Time.deltaTime;
         }
 
-        //clamp the velocity
-        xVel = isRunning ? Mathf.Clamp(xVel, -maxRunSpeed, maxRunSpeed) : Mathf.Clamp(xVel, -maxWalkSpeed, maxWalkSpeed);
-        zVel = isRunning ? Mathf.Clamp(zVel, -maxRunSpeed, maxRunSpeed) : Mathf.Clamp(zVel, -maxWalkSpeed, maxWalkSpeed);
+        // Clamp velocity between the max and min run speeds based on whether you're running
+        currSpeed = isRunning ? Mathf.Clamp(currSpeed, 0, maxRunSpeed) : Mathf.Clamp(currSpeed, 0, maxWalkSpeed);
 
-        //pass the calculated velocity to the rigidbody
-        var currVelocity = _camera.transform.forward * zVel + _camera.transform.right * xVel;
-        currVelocity.y = _rigidbody.velocity.y;
+        // Pass the velocity to the rigidbody
+        // mask out the 
+        var newVelocity = currSpeed * fwdDir;
+        _rigidbody.velocity = new Vector3(newVelocity.x, _rigidbody.velocity.y, newVelocity.z);
 
-        _rigidbody.velocity = currVelocity;
-
-        return currVelocity;
+        return currSpeed * fwdDir;
     }
 
-    public bool IsMoving()
+    public void UpdateRotation(Vector2 inputAxis)
     {
-        return Mathf.Abs(xVel) > Mathf.Epsilon || Mathf.Abs(zVel) > Mathf.Epsilon;
-    }
+        float lookOffset = lookDir.eulerAngles.y;
 
-    public void SetForwardDirection(Vector3 direction)
-    {
-        Vector3 fwdEuler = Quaternion.LookRotation(direction, Vector3.up).eulerAngles;
-        transform.rotation = Quaternion.Euler(0, fwdEuler.y, 0);
+        if(lockOnTarget != null)
+        {
+            Vector3 playerToTarget = lockOnTarget.position - transform.position;
+            Quaternion rot = Quaternion.FromToRotation(Vector3.forward, playerToTarget);
+            lookOffset = rot.eulerAngles.y;
+        }
+
+        //If there is no input, don't update the target angle since this will make it default to zero all the time
+        if(inputAxis.magnitude > Mathf.Epsilon)
+            targetAngle = Mathf.Atan2(inputAxis.x, inputAxis.y) * Mathf.Rad2Deg + lookOffset;
+
+        currAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref currTurnVelocity, turnRate);
+        transform.rotation = Quaternion.Euler(0, currAngle, 0);
+
+        fwdDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+        fwdDir = fwdDir.normalized;
     }
 
     public Vector3 GetVelocity()

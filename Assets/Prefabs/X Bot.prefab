@@ -888,6 +888,8 @@ MonoBehaviour:
   minWalkSpeed: 0.2
   maxRunSpeed: 4
   deadZone: 0.03
+  turnRate: 0.1
+  lookDir: {fileID: 1374487141983098102}
 --- !u!114 &7438891107015087876
 MonoBehaviour:
   m_ObjectHideFlags: 0

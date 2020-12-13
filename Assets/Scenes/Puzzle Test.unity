@@ -2259,7 +2259,7 @@ PrefabInstance:
     - target: {fileID: 4780724098843171823, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.042588275
+      value: -0.04258828
       objectReference: {fileID: 0}
     - target: {fileID: 4780724098843171823, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
         type: 3}
@@ -2294,12 +2294,12 @@ PrefabInstance:
     - target: {fileID: 5338103585672860671, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.053451605
+      value: 0.053451587
       objectReference: {fileID: 0}
     - target: {fileID: 5338103585672860671, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.055680193
+      value: -0.055680178
       objectReference: {fileID: 0}
     - target: {fileID: 5338103585672860671, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
         type: 3}
@@ -2325,6 +2325,26 @@ PrefabInstance:
         type: 3}
       propertyPath: maxRunSpeed
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6606034612999255221, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
+        type: 3}
+      propertyPath: turnRate
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6606034612999255221, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
+        type: 3}
+      propertyPath: lookDir
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6606034612999255221, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
+        type: 3}
+      propertyPath: accelRate
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 6606034612999255221, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
+        type: 3}
+      propertyPath: decelRate
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7826832529671682561, guid: 6d1fa7591b2b8af4283a5e3f455fffa7,
         type: 3}
@@ -2643,7 +2663,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh38398
+  m_Name: pb_Mesh19186
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
