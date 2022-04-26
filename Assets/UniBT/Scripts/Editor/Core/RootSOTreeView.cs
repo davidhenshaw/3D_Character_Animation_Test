@@ -191,6 +191,7 @@ namespace UniBT.Editor
             }
 
             root.PostCommit(_rootSO);
+            AssetDatabase.SaveAssets();
 
             // notify to unity editor that the tree is changed.
             EditorUtility.SetDirty(_rootSO);
