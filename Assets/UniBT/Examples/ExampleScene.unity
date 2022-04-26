@@ -1364,7 +1364,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   root:
     id: 0
-  rootSO: {fileID: 11400000, guid: 8d6fdea76bf61c240aee13a786da8129, type: 2}
+  rootSO: {fileID: 11400000, guid: ed1f212269d605b43b44c7aa13c14144, type: 2}
   updateType: 0
   references:
     version: 1
@@ -1375,13 +1375,21 @@ MonoBehaviour:
           serializedVersion: 2
           x: 0
           y: 0
-          width: 0
-          height: 0
+          width: 73
+          height: 77
         description: 
         child:
           id: 1
     00000001:
-      type: {class: , ns: , asm: }
+      type: {class: ScaleAction, ns: UniBT.Examples.Scripts.Behavior, asm: Example}
+      data:
+        graphPosition:
+          serializedVersion: 2
+          x: 176
+          y: 129
+          width: 115
+          height: 98
+        description: 
 --- !u!136 &2074895920
 CapsuleCollider:
   m_ObjectHideFlags: 0
