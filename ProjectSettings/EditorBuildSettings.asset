@@ -6,9 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/UniBT/Examples/ExampleScene.unity
+    guid: b7fa91f3d79fb411f9eaf5e48361e4d1
+  - enabled: 0
     path: Assets/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Puzzle Test.unity
     guid: 4bf590e343986324293046aa1a179f60
   m_configObjects:
