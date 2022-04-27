@@ -13,7 +13,8 @@ namespace UniBT
         [HideInInspector]
         [SerializeReference]
         //private Root root = new Root();
-        private Root root;
+        private Root runtimeRoot;
+        private Root editorRoot;
 
         [SerializeField]
         RootSO rootSO;
@@ -43,7 +44,7 @@ namespace UniBT
                 return;
             }
 
-            root = rootSO.GetRoot();
+            editorRoot = rootSO.GetRoot();
         }
 
         private void Awake() {
@@ -53,13 +54,15 @@ namespace UniBT
             if (!rootSO.HasRootReference())
                 Debug.LogError($"Something went wrong with the RootSO on {this}", rootSO);
 
-            root.Run(gameObject);
-            root.Awake();
+            runtimeRoot = editorRoot.CloneObject() as Root;
+
+            runtimeRoot.Run(gameObject);
+            runtimeRoot.Awake();
         }
 
         private void Start()
         {
-            root.Start();
+            runtimeRoot.Start();
         }
 
         private void Update()
@@ -69,9 +72,9 @@ namespace UniBT
         
         public void Tick()
         {
-            root.PreUpdate();
-            root.Update();
-            root.PostUpdate();
+            runtimeRoot.PreUpdate();
+            runtimeRoot.Update();
+            runtimeRoot.PostUpdate();
         }
 
     }

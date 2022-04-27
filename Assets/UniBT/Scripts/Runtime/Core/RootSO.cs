@@ -7,6 +7,8 @@ using UnityEngine;
 public class RootSO : ScriptableObject
 {
     public string displayName;
+
+    [HideInInspector]
     [SerializeReference]
     Root _root;
 
@@ -20,7 +22,7 @@ public class RootSO : ScriptableObject
             _root = new Root();
         }
 
-        return _root.DeepCopy();
+        return _root.CloneObject() as Root;
     }
 
     public Root GetRoot()

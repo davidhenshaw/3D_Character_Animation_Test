@@ -1,10 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 namespace UniBT
 {
+    [Serializable]
     public class Root : NodeBehavior
     {
+        [HideInInspector]
         [SerializeReference]
         private NodeBehavior child;
 

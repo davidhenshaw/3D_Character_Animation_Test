@@ -2,6 +2,7 @@ using UnityEngine;
 
 namespace UniBT.Examples.Scripts.Behavior
 {
+    [System.Serializable]
     public class IsHateGt : Conditional
     {
         
