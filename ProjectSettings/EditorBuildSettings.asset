@@ -9,10 +9,10 @@ EditorBuildSettings:
     path: Assets/UniBT/Examples/ExampleScene.unity
     guid: b7fa91f3d79fb411f9eaf5e48361e4d1
   - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/_My Project/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 0
-    path: Assets/Scenes/Puzzle Test.unity
+    path: Assets/_My Project/Scenes/Puzzle Test.unity
     guid: 4bf590e343986324293046aa1a179f60
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: a53f047842480e74db8970047adff9df,
