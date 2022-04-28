@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_My Project/Scenes/BehaviorTest.unity
+    guid: 0cd1556436678b74b8962e89f000179b
+  - enabled: 0
     path: Assets/UniBT/Examples/ExampleScene.unity
     guid: b7fa91f3d79fb411f9eaf5e48361e4d1
   - enabled: 0

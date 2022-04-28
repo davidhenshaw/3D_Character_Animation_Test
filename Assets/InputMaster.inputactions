@@ -11,7 +11,8 @@
                     "id": "2c41cdfe-7729-45e0-b344-3a9842f2fde2",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": true
                 },
                 {
                     "name": "CameraLook",
@@ -19,14 +20,33 @@
                     "id": "e3152880-d13e-42b8-ac32-5d4cfb5bd3c0",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": ""
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "LightAttack",
+                    "type": "Button",
+                    "id": "042d26c6-fb50-44bc-9641-e27df2180b45",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Sprint",
+                    "type": "Value",
+                    "id": "052fa8d8-9c6e-4e63-9a83-3f4182a8a44f",
+                    "expectedControlType": "Digital",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "WASD keys",
                     "id": "c8a66a70-3013-4ee4-b2f4-d61786d2d199",
-                    "path": "2DVector(mode=1)",
+                    "path": "2DVector(mode=2)",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -84,8 +104,30 @@
                     "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": "Keyboard and mouse",
                     "action": "CameraLook",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2a5148db-2f3b-41d2-8233-b26a2a5a860e",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and mouse",
+                    "action": "LightAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5e071da9-65c0-431e-abb4-4c356d29fddc",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard and mouse",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
