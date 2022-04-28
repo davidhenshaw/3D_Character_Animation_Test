@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public interface IPlayerMovementHandler
+public interface IMovementInputHandler
 {
     public void OnMovement(InputValue value);
 }
 
-public interface IPlayerCameraHandler
+public interface ICameraInputHandler
 {
     public void OnCameraLook(InputValue value);
 }
@@ -21,7 +21,12 @@ public interface IPlayerAttackHandler
     public void OnLightAttack(InputValue value);
 }
 
-public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMovementHandler, IPlayerAttackHandler
+public interface IAttackAnimationHandler
+{
+    void SetAttackState(AttackState state);
+}
+
+public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementInputHandler, IPlayerAttackHandler, IAttackAnimationHandler
 {
     const string LightAttack = "attack_slash";
 
@@ -49,6 +54,7 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
 
     [SerializeField]
     private BehaviorTree _tree;
+    private AttackState _attackState;
 
     private void Awake()
     {
@@ -112,6 +118,8 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
         }
     }
 
+    //Behavior Tree
+
     private TaskStatus LocomotionTask()
     {
         _animator.speed = _moveSpeed;
@@ -173,7 +181,13 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
         else
             return false;
     }
-    
+
+    // Data contracts
+
+    public void SetAttackState(AttackState state)
+    {
+        _attackState = state;
+    }
 
     public void OnLightAttack(InputValue value)
     {
@@ -200,6 +214,8 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
         else
             _animator.SetBool("running", true);
     }    
+
+    //Helpers
 
     private void HandleTransposerCam(Vector2 input, CinemachineComponentBase component)
     {

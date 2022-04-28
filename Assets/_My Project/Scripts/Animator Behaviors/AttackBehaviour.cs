@@ -4,21 +4,24 @@ using UnityEngine;
 
 public class AttackBehaviour : StateMachineBehaviour
 {
-    public StateBehaviourListener listenerSO;
     public bool IsAttacking { get; set; }
+    public AttackState state { get; private set; } = AttackState.None;
     private Stack<AnimatorStateInfo> attackCalls = new Stack<AnimatorStateInfo>();
+
+    public event System.Action startup;
+    public bool isStartup { get; private set; }
+    public event System.Action active;
+    public event System.Action cooldown;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        listenerSO.OnStateEnter(animator, stateInfo, layerIndex);
         attackCalls.Push(stateInfo);
         IsAttacking = true;
+        //AttackStartup();
     }
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        listenerSO.OnStateExit(animator, stateInfo, layerIndex);
-
         if (attackCalls.Count > 0)
         {
             IsAttacking = true;
@@ -26,25 +29,16 @@ public class AttackBehaviour : StateMachineBehaviour
         }
 
         if (attackCalls.Count == 0)
+        {
             IsAttacking = false;
-
+            state = AttackState.None;
+        }
     }
+}
 
-    public void OnActive()
-    {
-        if (!(listenerSO is IAttackBehaviorListener attackListener))
-            return;
-
-        attackListener.OnAttackActive();
-    }
-
-    public void OnCooldown()
-    {
-        if (!(listenerSO is IAttackBehaviorListener attackListener))
-            return;
-
-        attackListener.OnAttackCooldown();
-    }
+public enum AttackState
+{
+    Startup, Active, Cooldown, None
 }
 
 public interface IAttackBehaviorListener
