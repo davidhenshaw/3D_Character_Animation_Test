@@ -1,4 +1,6 @@
 using Cinemachine;
+using CleverCrow.Fluid.BTs.Tasks;
+using CleverCrow.Fluid.BTs.Trees;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,15 +23,8 @@ public interface IPlayerAttackHandler
 
 public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMovementHandler, IPlayerAttackHandler
 {
-    float xVel;
-    float zVel;
-    public bool isRunning;
-    [SerializeField] public float accelRate = 4;
-    [SerializeField] public float decelRate = 2;
-    [SerializeField] public float maxWalkSpeed = 2;
-    [SerializeField] public float minWalkSpeed = 0.2f;
-    [SerializeField] public float maxRunSpeed = 6;
-    [SerializeField] public float deadZone = 0.03f;
+    const string LightAttack = "attack_slash";
+
     [SerializeField] float _moveSpeed = 1.5f;
     [Space]
     [Range(0, 0.2f)]
@@ -40,14 +35,20 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
 
     [SerializeField]
     CinemachineVirtualCamera _vCam;
+
+    public InputAction _lightAttack;
+
     Camera _camera;
     Vector2 _smoothedInput = new Vector2();
     Vector2 _currentInput = new Vector2();
     Vector2 _cameraInput = new Vector2();
-
+    bool applyRootMotion = true;
 
     [SerializeField]
     private float _lookSensitivity = 1;
+
+    [SerializeField]
+    private BehaviorTree _tree;
 
     private void Awake()
     {
@@ -55,26 +56,52 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
         _charController = GetComponent<CharacterController>();
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
-        _animator.applyRootMotion = true;
+
+        SetUpBehaviorTree();
+    }
+
+    private void SetUpBehaviorTree()
+    {
+        _tree = new BehaviorTreeBuilder(gameObject)
+            .Sequence("Continue Loop?")
+                .Inverter("Not Attacking?")
+                    .Sequence()
+                        .Condition("Request Attack", RequestedLightAttack)
+                        .Do("Handle Light Attack", LightAttackTask)
+                    .End()
+                .End()
+                .Sequence("Handle Locomotion")
+                    .Do("Locomotion", LocomotionTask)
+                .End()
+            .End()
+            .Build();
     }
 
     private void Update()
     {
-        _animator.speed = _moveSpeed;
-
-        _smoothedInput = Vector2.MoveTowards(_smoothedInput, _currentInput, 0.05f);
-
-        _animator.SetFloat("xVelocity", _smoothedInput.x);
-        _animator.SetFloat("zVelocity", _smoothedInput.y);
-        _animator.SetFloat("magnitude", Vector3.ClampMagnitude(_smoothedInput, 1).magnitude);
-
-        if (_currentInput.magnitude < 0.01f)
-            return;
-
-        var lookVector = GetWorldSpaceInput(_smoothedInput, Camera.main.transform);
-        SetXZLookVector(lookVector);
+        _tree.Tick();
     }
 
+    private void OnEnable()
+    {
+        _lightAttack.Enable();
+    }
+
+    private void OnDisable()
+    {
+        _lightAttack.Disable();
+    }
+    private void OnAnimatorMove()
+    {
+        if (!applyRootMotion)
+            return;
+
+        var deltaPos = _animator.deltaPosition;
+        deltaPos.y = _charController.transform.position.y;
+
+        _charController.Move(deltaPos);
+    }
+    
     private void LateUpdate()
     {
         CinemachineComponentBase cinemachineComponent = _vCam.GetCinemachineComponent<CinemachineOrbitalTransposer>();
@@ -85,14 +112,74 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
         }
     }
 
+    private TaskStatus LocomotionTask()
+    {
+        _animator.speed = _moveSpeed;
+
+        _smoothedInput = Vector2.MoveTowards(_smoothedInput, _currentInput, 0.05f);
+
+        if (_smoothedInput.magnitude < 0.4f)
+            applyRootMotion = false;
+        else
+            applyRootMotion = true;
+
+        UpdateAnimatorState();
+
+        UpdateLookDirection();
+
+        return TaskStatus.Success;
+    }
+
+    TaskStatus LightAttackTask()
+    {
+        var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
+        applyRootMotion = true;
+
+        if (!attackAnim)
+            return TaskStatus.Success;
+
+        if (attackAnim.IsAttacking)
+            return TaskStatus.Continue;
+
+        return TaskStatus.Success;
+    }
+
+    private void UpdateLookDirection()
+    {
+        if (_currentInput.magnitude < 0.01f)
+            return;
+
+        var lookVector = GetWorldSpaceInput(_smoothedInput, Camera.main.transform);
+        SetXZLookVector(lookVector);
+    }
+
+    private void UpdateAnimatorState()
+    {
+        _animator.SetFloat("xVelocity", _smoothedInput.x);
+        _animator.SetFloat("zVelocity", _smoothedInput.y);
+        _animator.SetFloat("magnitude", Vector3.ClampMagnitude(_smoothedInput, 1).magnitude);
+    }
+
+    bool RequestedLightAttack()
+    {
+        if (_lightAttack.triggered)
+        {
+            //Start doing the attack animation
+            _animator.CrossFadeInFixedTime(LightAttack, 0.2f);
+            var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
+            attackAnim.IsAttacking = true;
+            return true;
+        }
+        else
+            return false;
+    }
+    
+
     public void OnLightAttack(InputValue value)
     {
         if(value.isPressed)
         {
-            //_animator.SetTrigger("attackRequested");
-            var info = _animator.GetCurrentAnimatorStateInfo(0);
-
-            _animator.CrossFadeInFixedTime("attack_slash", 0.2f);
+            //HandleLightAttack();
         }
     }
 
@@ -114,17 +201,6 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
             _animator.SetBool("running", true);
     }    
 
-    private void OnAnimatorMove()
-    {
-        if (_smoothedInput.magnitude < 0.4f)
-            return;
-
-        var deltaPos = _animator.deltaPosition;
-        deltaPos.y = _charController.transform.position.y;
-
-        _charController.Move(deltaPos);
-    }
-
     private void HandleTransposerCam(Vector2 input, CinemachineComponentBase component)
     {
         var transposer = component as CinemachineOrbitalTransposer;
@@ -139,13 +215,11 @@ public class CharacterMovement : MonoBehaviour, IPlayerCameraHandler, IPlayerMov
         return worldSpaceVec;
     }
 
-
     public void SetXZLookVector(Vector3 direction)
     {
         Vector3 fwdEuler = Quaternion.LookRotation(direction, Vector3.up).eulerAngles;
         transform.rotation = Quaternion.Euler(0, fwdEuler.y, 0);
     }
-
 
     public void SetForwardDirection(Vector3 direction)
     {
