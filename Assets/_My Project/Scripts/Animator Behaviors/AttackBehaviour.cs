@@ -37,7 +37,7 @@ public class AttackBehaviour : StateMachineBehaviour
 
 public enum AttackState
 {
-    Startup, Active, Cooldown, None
+    Startup, Active, Cooldown, None, Transitioning
 }
 
 public interface IAttackBehaviorListener

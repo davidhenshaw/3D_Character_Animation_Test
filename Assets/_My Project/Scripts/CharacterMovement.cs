@@ -30,6 +30,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 {
     const string LightAttack = "attack_slash";
     const string ComboTrigger = "comboRequested";
+    const string AttackTrigger = "attackRequested";
 
     CharacterController _charController;
     Animator _animator;
@@ -74,11 +75,14 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
                 .Inverter("Not Attacking?")
                     .Sequence()
                         .Condition("Request Attack", RequestedLightAttack)
-                        .Sequence("Attack Sequence")
-                            .Do("Transition", TransitionToStartup)
-                            .Do("Startup", HandleAttackStartup)
-                            .Do("Active", HandleAttackActive)
-                            .Do("Cooldown", HandleAttackCooldown)
+                        .RepeatUntilSuccess("Attack Sequence")
+                            .Sequence()
+                                .Do("Set Anim Trigger", SetAnimationPlay)
+                                .Do("Transitioning", TransitionToStartup)
+                                .Do("Startup", HandleAttackStartup)
+                                .Do("Active", HandleAttackActive)
+                                .Do("Cooldown", HandleAttackCooldown)
+                            .End()
                         .End()
                     .End()
                 .End()
@@ -157,15 +161,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     //Behavior Tree
 
-    TaskStatus ComboCheckTask()
-    {
-        var canCombo = _attackState == AttackState.Active || _attackState == AttackState.Cooldown;
 
-        if (RequestedLightAttack() &&  canCombo)
-            return TaskStatus.Failure;
-
-        return TaskStatus.Success;
-    }
 
     private TaskStatus LocomotionTask()
     {
@@ -185,14 +181,21 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         return TaskStatus.Success;
     }
 
+    TaskStatus SetAnimationPlay()
+    {
+        _animator.SetTrigger(AttackTrigger);
+        applyRootMotion = true;
+        _attackState = AttackState.Transitioning;
+
+        return TaskStatus.Success;
+    }
+
     TaskStatus TransitionToStartup()
     {
-        if (_attackState != AttackState.None)
-            return TaskStatus.Success;
+        if (_attackState == AttackState.Transitioning)
+            return TaskStatus.Continue;
 
-        _animator.CrossFadeInFixedTime(LightAttack, 0.2f);
-        applyRootMotion = true;
-        _attackState = AttackState.Startup;
+        //_animator.CrossFadeInFixedTime(LightAttack, 0.2f);
         return TaskStatus.Success;
     }
 
@@ -209,8 +212,12 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         if (_attackState != AttackState.Active)
             return TaskStatus.Success;
 
-        if (RequestedLightAttack())
-            _animator.SetTrigger(ComboTrigger);
+        if (RequestedLightAttack())//Combo interrupt
+        {
+            _attackState = AttackState.Transitioning;
+            //_animator.SetTrigger(AttackTrigger);
+            return TaskStatus.Failure;
+        }
 
         return TaskStatus.Continue;
     }
@@ -223,8 +230,12 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
             return TaskStatus.Success;
         }
 
-        if (RequestedLightAttack())
-            _animator.SetTrigger(ComboTrigger);
+        if (RequestedLightAttack())//Combo interrupt
+        {
+            _attackState = AttackState.Transitioning;
+            //_animator.SetTrigger(AttackTrigger);
+            return TaskStatus.Failure;
+        }
 
         return TaskStatus.Continue;
     }
