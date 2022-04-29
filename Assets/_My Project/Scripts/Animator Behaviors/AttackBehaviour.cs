@@ -17,7 +17,6 @@ public class AttackBehaviour : StateMachineBehaviour
     {
         attackCalls.Push(stateInfo);
         IsAttacking = true;
-        //AttackStartup();
     }
 
     override public void OnStateExit(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

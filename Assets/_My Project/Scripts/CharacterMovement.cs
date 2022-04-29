@@ -185,28 +185,13 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         return TaskStatus.Success;
     }
 
-    TaskStatus LightAttackTask()
-    {
-        var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
-        applyRootMotion = true;
-
-        if (!attackAnim)
-            return TaskStatus.Success;
-
-        if (attackAnim.IsAttacking)
-            return TaskStatus.Continue;
-
-        return TaskStatus.Success;
-    }
-
     TaskStatus TransitionToStartup()
     {
         if (_attackState != AttackState.None)
             return TaskStatus.Success;
 
         _animator.CrossFadeInFixedTime(LightAttack, 0.2f);
-        var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
-        attackAnim.IsAttacking = true;
+        applyRootMotion = true;
         _attackState = AttackState.Startup;
         return TaskStatus.Success;
     }
@@ -233,7 +218,10 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
     TaskStatus HandleAttackCooldown()
     {
         if (_attackState != AttackState.Cooldown)
+        {
+            applyRootMotion = false;
             return TaskStatus.Success;
+        }
 
         if (RequestedLightAttack())
             _animator.SetTrigger(ComboTrigger);
