@@ -5,7 +5,7 @@ using UnityEngine;
 public class AttackBehaviour : StateMachineBehaviour
 {
     public bool IsAttacking { get; set; }
-    public AttackState state { get; private set; } = AttackState.None;
+    public AttackState state { get; private set; } = AttackState.Done;
     private Stack<AnimatorStateInfo> attackCalls = new Stack<AnimatorStateInfo>();
 
     public event System.Action startup;
@@ -30,14 +30,14 @@ public class AttackBehaviour : StateMachineBehaviour
         if (attackCalls.Count == 0)
         {
             IsAttacking = false;
-            state = AttackState.None;
+            state = AttackState.Done;
         }
     }
 }
 
 public enum AttackState
 {
-    Startup, Active, Cooldown, None, Transitioning
+    Startup, Active, Cooldown, Done, Transitioning
 }
 
 public interface IAttackBehaviorListener

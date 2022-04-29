@@ -30,7 +30,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 {
     const string LightAttack = "attack_slash";
     const string ComboTrigger = "comboRequested";
-    const string AttackTrigger = "attackRequested";
+    const string AttackTrigger = "lightAttackReq";
 
     CharacterController _charController;
     Animator _animator;
@@ -56,7 +56,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     [SerializeField]
     private BehaviorTree _tree;
-    private AttackState _attackState = AttackState.None;
+    private AttackState _attackState = AttackState.Done;
 
     private void Awake()
     {
@@ -75,15 +75,8 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
                 .Inverter("Not Attacking?")
                     .Sequence()
                         .Condition("Request Attack", RequestedLightAttack)
-                        .RepeatUntilSuccess("Attack Sequence")
-                            .Sequence()
-                                .Do("Set Anim Trigger", SetAnimationPlay)
-                                .Do("Transitioning", TransitionToStartup)
-                                .Do("Startup", HandleAttackStartup)
-                                .Do("Active", HandleAttackActive)
-                                .Do("Cooldown", HandleAttackCooldown)
-                            .End()
-                        .End()
+                        .Condition("Check Can Attack", CanAttackCheck)
+                        .Splice(AttackSubTree())
                     .End()
                 .End()
                 .Sequence("Handle Locomotion")
@@ -93,35 +86,6 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
             .Build();
     }
 
-    BehaviorTree AttackSubtree()
-    {
-        return new BehaviorTreeBuilder(gameObject)
-            .Inverter("Not Attacking?")
-                    .Sequence()
-                        .Condition("Request Attack", RequestedLightAttack)
-                        .Sequence("Attack Sequence")
-                            .Splice(ComboCheckSubtree())
-                            .Do("Transition", TransitionToStartup)
-                            .Do("Startup", HandleAttackStartup)
-                            .Do("Active", HandleAttackActive)
-                            .Do("Cooldown", HandleAttackCooldown)
-                        .End()
-                    .End()
-                .End()
-                .Build();
-    }
-
-    BehaviorTree ComboCheckSubtree()
-    {
-        return new BehaviorTreeBuilder(gameObject)
-            .Sequence("Combo Check")
-                .Inverter()
-                    .Condition("Cooldown", () => _attackState == AttackState.Cooldown)
-                    .Condition("Request Attack", RequestedLightAttack)
-                .End()
-            .End()
-            .Build();
-    }
 
     private void Update()
     {
@@ -151,17 +115,63 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
     
     private void LateUpdate()
     {
-        CinemachineComponentBase cinemachineComponent = _vCam.GetCinemachineComponent<CinemachineOrbitalTransposer>();
-        if (cinemachineComponent)
-        {
-            HandleTransposerCam(_cameraInput, cinemachineComponent);
-            return;
-        }
+        //CinemachineComponentBase cinemachineComponent = _vCam.GetCinemachineComponent<CinemachineOrbitalTransposer>();
+        //if (cinemachineComponent)
+        //{
+        //    HandleTransposerCam(_cameraInput, cinemachineComponent);
+        //    return;
+        //}
     }
 
     //Behavior Tree
 
+    BehaviorTree AttackSubTree()
+    {
+        return new BehaviorTreeBuilder(gameObject)
+            .Sequence("Attack Sequence")
+                .Do("Set Animation", TriggerAttackAnim)
+                .Do("Handle Attack", AttackTask)
+            .End()
+            .Build();
+    }
 
+    bool CanAttackCheck()
+    {
+        bool permission = true;
+        switch(_attackState)
+        {
+            case AttackState.Transitioning:
+            case AttackState.Startup:
+                permission = false;
+                break;
+        }
+        return permission;
+    }
+
+    TaskStatus TriggerAttackAnim()
+    {
+        _animator.SetTrigger(AttackTrigger);
+        applyRootMotion = true;
+        _attackState = AttackState.Transitioning;
+
+        return TaskStatus.Success;
+    }
+
+    TaskStatus AttackTask()
+    {
+        if (_attackState == AttackState.Done)
+            return TaskStatus.Success;
+
+        bool canCombo = _attackState == AttackState.Active || _attackState == AttackState.Cooldown;
+
+        if(RequestedLightAttack() && canCombo)
+        {
+            TriggerAttackAnim();
+            return TaskStatus.Continue;
+        }
+
+        return TaskStatus.Continue;
+    }
 
     private TaskStatus LocomotionTask()
     {
@@ -179,65 +189,6 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         UpdateLookDirection();
 
         return TaskStatus.Success;
-    }
-
-    TaskStatus SetAnimationPlay()
-    {
-        _animator.SetTrigger(AttackTrigger);
-        applyRootMotion = true;
-        _attackState = AttackState.Transitioning;
-
-        return TaskStatus.Success;
-    }
-
-    TaskStatus TransitionToStartup()
-    {
-        if (_attackState == AttackState.Transitioning)
-            return TaskStatus.Continue;
-
-        //_animator.CrossFadeInFixedTime(LightAttack, 0.2f);
-        return TaskStatus.Success;
-    }
-
-    TaskStatus HandleAttackStartup()
-    {
-        if (_attackState != AttackState.Startup)
-            return TaskStatus.Success;
-
-        return TaskStatus.Continue;
-    }
-
-    TaskStatus HandleAttackActive()
-    {
-        if (_attackState != AttackState.Active)
-            return TaskStatus.Success;
-
-        if (RequestedLightAttack())//Combo interrupt
-        {
-            _attackState = AttackState.Transitioning;
-            //_animator.SetTrigger(AttackTrigger);
-            return TaskStatus.Failure;
-        }
-
-        return TaskStatus.Continue;
-    }
-
-    TaskStatus HandleAttackCooldown()
-    {
-        if (_attackState != AttackState.Cooldown)
-        {
-            applyRootMotion = false;
-            return TaskStatus.Success;
-        }
-
-        if (RequestedLightAttack())//Combo interrupt
-        {
-            _attackState = AttackState.Transitioning;
-            //_animator.SetTrigger(AttackTrigger);
-            return TaskStatus.Failure;
-        }
-
-        return TaskStatus.Continue;
     }
 
     private void UpdateLookDirection()
@@ -272,9 +223,12 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     // Interface contracts
 
-    public void SetAttackState(AttackState state)
+    public void SetAttackState(AttackState requestedState)
     {
-        _attackState = state;
+        if (requestedState == AttackState.Done && _attackState != AttackState.Cooldown)
+            return; //Only allow transitions to Done if we were previously in cooldown
+
+        _attackState = requestedState;
     }
 
     public void OnLightAttack(InputValue value)
