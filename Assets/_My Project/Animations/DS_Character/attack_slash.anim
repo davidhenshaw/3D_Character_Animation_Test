@@ -54066,16 +54066,16 @@ AnimationClip:
     intParameter: 1
     messageOptions: 0
   - time: 0.8
-    functionName: OnAttackCooldown
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.8
     functionName: SetAttackState
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 2
+    messageOptions: 0
+  - time: 1.2666667
+    functionName: SetAttackState
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 3
     messageOptions: 0

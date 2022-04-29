@@ -29,14 +29,13 @@ public interface IAttackAnimationHandler
 public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementInputHandler, IPlayerAttackHandler, IAttackAnimationHandler
 {
     const string LightAttack = "attack_slash";
-
-    [SerializeField] float _moveSpeed = 1.5f;
-    [Space]
-    [Range(0, 0.2f)]
-    [SerializeField] float _inputSmoothTime = 2f;
     CharacterController _charController;
     Animator _animator;
     Rigidbody _rigidbody;
+
+    [SerializeField] float _animatorSpeed = 1.5f;
+    [Space]
+
 
     [SerializeField]
     CinemachineVirtualCamera _vCam;
@@ -54,7 +53,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     [SerializeField]
     private BehaviorTree _tree;
-    private AttackState _attackState;
+    private AttackState _attackState = AttackState.None;
 
     private void Awake()
     {
@@ -73,7 +72,12 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
                 .Inverter("Not Attacking?")
                     .Sequence()
                         .Condition("Request Attack", RequestedLightAttack)
-                        .Do("Handle Light Attack", LightAttackTask)
+                        .Sequence("Attack Sequence")
+                            .Do("Transition", TransitionToStartup)
+                            .Do("Startup", HandleAttackStartup)
+                            .Do("Active", HandleAttackActive)
+                            .Do("Cooldown", HandleAttackCooldown)
+                        .End()
                     .End()
                 .End()
                 .Sequence("Handle Locomotion")
@@ -97,6 +101,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
     {
         _lightAttack.Disable();
     }
+
     private void OnAnimatorMove()
     {
         if (!applyRootMotion)
@@ -122,7 +127,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     private TaskStatus LocomotionTask()
     {
-        _animator.speed = _moveSpeed;
+        _animator.speed = _animatorSpeed;
 
         _smoothedInput = Vector2.MoveTowards(_smoothedInput, _currentInput, 0.05f);
 
@@ -149,6 +154,35 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         if (attackAnim.IsAttacking)
             return TaskStatus.Continue;
 
+        return TaskStatus.Success;
+    }
+
+    TaskStatus TransitionToStartup()
+    {
+        if (_attackState == AttackState.None)
+            return TaskStatus.Continue;
+
+        return TaskStatus.Success;
+    }
+
+    TaskStatus HandleAttackStartup()
+    {
+        if (_attackState == AttackState.Startup)
+            return TaskStatus.Continue;
+        return TaskStatus.Success;
+    }
+
+    TaskStatus HandleAttackActive()
+    {
+        if (_attackState == AttackState.Active)
+            return TaskStatus.Continue;
+        return TaskStatus.Success;
+    }
+
+    TaskStatus HandleAttackCooldown()
+    {
+        if (_attackState == AttackState.Cooldown)
+            return TaskStatus.Continue;
         return TaskStatus.Success;
     }
 
@@ -182,7 +216,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
             return false;
     }
 
-    // Data contracts
+    // Interface contracts
 
     public void SetAttackState(AttackState state)
     {
