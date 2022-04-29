@@ -4108,7 +4108,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-13628
+  m_Name: pb_Mesh21680
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -4731,7 +4731,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55831d698ddceca4dbf5cbe009a8bc09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animatorSpeed: 1.5
+  _animatorSpeed: 1.48
   _vCam: {fileID: 338070761}
   _lightAttack:
     m_Name: Light Attack

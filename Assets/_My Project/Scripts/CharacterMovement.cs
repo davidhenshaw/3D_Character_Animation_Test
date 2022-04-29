@@ -29,10 +29,12 @@ public interface IAttackAnimationHandler
 public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementInputHandler, IPlayerAttackHandler, IAttackAnimationHandler
 {
     const string LightAttack = "attack_slash";
+    const string ComboTrigger = "comboRequested";
+
     CharacterController _charController;
     Animator _animator;
     Rigidbody _rigidbody;
-
+    [Min(0)]
     [SerializeField] float _animatorSpeed = 1.5f;
     [Space]
 
@@ -87,6 +89,36 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
             .Build();
     }
 
+    BehaviorTree AttackSubtree()
+    {
+        return new BehaviorTreeBuilder(gameObject)
+            .Inverter("Not Attacking?")
+                    .Sequence()
+                        .Condition("Request Attack", RequestedLightAttack)
+                        .Sequence("Attack Sequence")
+                            .Splice(ComboCheckSubtree())
+                            .Do("Transition", TransitionToStartup)
+                            .Do("Startup", HandleAttackStartup)
+                            .Do("Active", HandleAttackActive)
+                            .Do("Cooldown", HandleAttackCooldown)
+                        .End()
+                    .End()
+                .End()
+                .Build();
+    }
+
+    BehaviorTree ComboCheckSubtree()
+    {
+        return new BehaviorTreeBuilder(gameObject)
+            .Sequence("Combo Check")
+                .Inverter()
+                    .Condition("Cooldown", () => _attackState == AttackState.Cooldown)
+                    .Condition("Request Attack", RequestedLightAttack)
+                .End()
+            .End()
+            .Build();
+    }
+
     private void Update()
     {
         _tree.Tick();
@@ -125,6 +157,16 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     //Behavior Tree
 
+    TaskStatus ComboCheckTask()
+    {
+        var canCombo = _attackState == AttackState.Active || _attackState == AttackState.Cooldown;
+
+        if (RequestedLightAttack() &&  canCombo)
+            return TaskStatus.Failure;
+
+        return TaskStatus.Success;
+    }
+
     private TaskStatus LocomotionTask()
     {
         _animator.speed = _animatorSpeed;
@@ -159,31 +201,44 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     TaskStatus TransitionToStartup()
     {
-        if (_attackState == AttackState.None)
-            return TaskStatus.Continue;
+        if (_attackState != AttackState.None)
+            return TaskStatus.Success;
 
+        _animator.CrossFadeInFixedTime(LightAttack, 0.2f);
+        var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
+        attackAnim.IsAttacking = true;
+        _attackState = AttackState.Startup;
         return TaskStatus.Success;
     }
 
     TaskStatus HandleAttackStartup()
     {
-        if (_attackState == AttackState.Startup)
-            return TaskStatus.Continue;
-        return TaskStatus.Success;
+        if (_attackState != AttackState.Startup)
+            return TaskStatus.Success;
+
+        return TaskStatus.Continue;
     }
 
     TaskStatus HandleAttackActive()
     {
-        if (_attackState == AttackState.Active)
-            return TaskStatus.Continue;
-        return TaskStatus.Success;
+        if (_attackState != AttackState.Active)
+            return TaskStatus.Success;
+
+        if (RequestedLightAttack())
+            _animator.SetTrigger(ComboTrigger);
+
+        return TaskStatus.Continue;
     }
 
     TaskStatus HandleAttackCooldown()
     {
-        if (_attackState == AttackState.Cooldown)
-            return TaskStatus.Continue;
-        return TaskStatus.Success;
+        if (_attackState != AttackState.Cooldown)
+            return TaskStatus.Success;
+
+        if (RequestedLightAttack())
+            _animator.SetTrigger(ComboTrigger);
+
+        return TaskStatus.Continue;
     }
 
     private void UpdateLookDirection()
@@ -207,9 +262,9 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         if (_lightAttack.triggered)
         {
             //Start doing the attack animation
-            _animator.CrossFadeInFixedTime(LightAttack, 0.2f);
-            var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
-            attackAnim.IsAttacking = true;
+            //_animator.CrossFadeInFixedTime(LightAttack, 0.2f);
+            //var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
+            //attackAnim.IsAttacking = true;
             return true;
         }
         else
