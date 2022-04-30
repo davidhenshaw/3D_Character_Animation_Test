@@ -4109,7 +4109,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh39622
+  m_Name: pb_Mesh21682
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -4753,6 +4753,7 @@ MonoBehaviour:
       m_Flags: 0
     m_Flags: 0
   _lookSensitivity: 1.34
+  _attackState: 3
 --- !u!114 &919132148132141626
 MonoBehaviour:
   m_ObjectHideFlags: 0

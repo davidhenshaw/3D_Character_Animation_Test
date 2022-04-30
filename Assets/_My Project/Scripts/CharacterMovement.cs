@@ -28,9 +28,7 @@ public interface IAttackAnimationHandler
 
 public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementInputHandler, IPlayerAttackHandler, IAttackAnimationHandler
 {
-    const string LightAttack = "attack_slash";
-    const string ComboTrigger = "comboRequested";
-    const string AttackTrigger = "lightAttackReq";
+    const string LightAttackTrigger = "lightAttackReq";
 
     CharacterController _charController;
     Animator _animator;
@@ -56,10 +54,13 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     [SerializeField]
     private BehaviorTree _tree;
-    private AttackState _attackState = AttackState.Done;
+
+    [Tooltip("Used by Animator")]
+    public AttackState _attackState = AttackState.Done;
 
     private void Awake()
     {
+        _attackState = AttackState.Done;
         _camera = FindObjectOfType<Camera>();
         _charController = GetComponent<CharacterController>();
         _animator = GetComponent<Animator>();
@@ -150,7 +151,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     TaskStatus TriggerAttackAnim()
     {
-        _animator.SetTrigger(AttackTrigger);
+        _animator.SetTrigger(LightAttackTrigger);
         applyRootMotion = true;
         _attackState = AttackState.Transitioning;
 
