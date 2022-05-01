@@ -26584,7 +26584,7 @@ AnimationClip:
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
-        time: 0.8
+        time: 0.73333335
         value: 2
         inSlope: Infinity
         outSlope: Infinity
@@ -26593,7 +26593,7 @@ AnimationClip:
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
-        time: 1.2333333
+        time: 1.1333333
         value: 3
         inSlope: Infinity
         outSlope: Infinity
@@ -54131,7 +54131,7 @@ AnimationClip:
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
-        time: 0.8
+        time: 0.73333335
         value: 2
         inSlope: Infinity
         outSlope: Infinity
@@ -54140,7 +54140,7 @@ AnimationClip:
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
-        time: 1.2333333
+        time: 1.1333333
         value: 3
         inSlope: Infinity
         outSlope: Infinity

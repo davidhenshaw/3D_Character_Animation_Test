@@ -122,6 +122,17 @@ public partial class @InputMaster : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""a09a10d0-a589-4666-9824-8700ca52f445"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Movement"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""8594d86f-2dd2-43d6-a99d-58c3537b1b87"",
                     ""path"": ""<Mouse>/delta"",
                     ""interactions"": """",

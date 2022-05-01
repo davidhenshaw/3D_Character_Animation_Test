@@ -29,6 +29,7 @@ public interface IAttackAnimationHandler
 public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementInputHandler, IPlayerAttackHandler, IAttackAnimationHandler
 {
     const string LightAttackTrigger = "lightAttackReq";
+    const string DodgeTrigger = "dodgeRequested";
 
     CharacterController _charController;
     Animator _animator;
@@ -37,17 +38,14 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
     [SerializeField] float _animatorSpeed = 1.5f;
     [Space]
 
+    public InputAction _lightAttackInput;
+    public InputAction _dodgeInput;
 
-    [SerializeField]
-    CinemachineVirtualCamera _vCam;
-
-    public InputAction _lightAttack;
-
-    Camera _camera;
     Vector2 _smoothedInput = new Vector2();
     Vector2 _currentInput = new Vector2();
     Vector2 _cameraInput = new Vector2();
     bool applyRootMotion = true;
+    bool dodgeQueued = false;
 
     [SerializeField]
     private float _lookSensitivity = 1;
@@ -61,7 +59,6 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
     private void Awake()
     {
         _attackState = AttackState.Done;
-        _camera = FindObjectOfType<Camera>();
         _charController = GetComponent<CharacterController>();
         _animator = GetComponent<Animator>();
         _rigidbody = GetComponent<Rigidbody>();
@@ -69,40 +66,26 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         SetUpBehaviorTree();
     }
 
-    private void SetUpBehaviorTree()
-    {
-        _tree = new BehaviorTreeBuilder(gameObject)
-            .Sequence("Continue Loop?")
-                .Inverter("Not Attacking?")
-                    .Sequence()
-                        .Condition("Request Attack", RequestedLightAttack)
-                        .Condition("Check Can Attack", CanAttackCheck)
-                        .Splice(AttackSubTree())
-                    .End()
-                .End()
-                .Sequence("Handle Locomotion")
-                    .Do("Locomotion", LocomotionTask)
-                .End()
-            .End()
-            .Build();
-    }
-
 
     private void Update()
     {
         _tree.Tick();
+        _smoothedInput = Vector2.MoveTowards(_smoothedInput, _currentInput, 0.05f);
     }
 
     private void OnEnable()
     {
-        _lightAttack.Enable();
+        _lightAttackInput.Enable();
+        _dodgeInput.Enable();
     }
 
     private void OnDisable()
     {
-        _lightAttack.Disable();
+        _lightAttackInput.Disable();
+        _dodgeInput.Disable();
     }
 
+    
     private void OnAnimatorMove()
     {
         if (!applyRootMotion)
@@ -113,27 +96,48 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
         _charController.Move(deltaPos);
     }
-    
-    private void LateUpdate()
-    {
-        //CinemachineComponentBase cinemachineComponent = _vCam.GetCinemachineComponent<CinemachineOrbitalTransposer>();
-        //if (cinemachineComponent)
-        //{
-        //    HandleTransposerCam(_cameraInput, cinemachineComponent);
-        //    return;
-        //}
-    }
 
     //Behavior Tree
+    private void SetUpBehaviorTree()
+    {
+        _tree = new BehaviorTreeBuilder(gameObject)
+            .Selector("Continue Loop?")
+                .Sequence("Handle Dodge")
+                    .Condition("Requested Dodge?", ()=> (_dodgeInput.triggered || dodgeQueued))
+                    .Splice(DodgingSubTree())
+                .End()
+                .Sequence("Handle Attack")
+                    .Condition("Request Attack", RequestedLightAttack)
+                    .Condition("Check Can Attack", CanAttackCheck)
+                    .Splice(AttackSubTree())
+                .End()
+                .Sequence("Handle Locomotion")
+                    .Do("Locomotion", LocomotionTask)
+                .End()
+            .End()
+            .Build();
+    }
 
     BehaviorTree AttackSubTree()
     {
         return new BehaviorTreeBuilder(gameObject)
             .Sequence("Attack Sequence")
-                .Do("Set Animation", TriggerAttackAnim)
+                .Do("Set Animation", () => TriggerAnim(LightAttackTrigger))
+                .Do("Await Startup", WaitUntilAnimStart)
                 .Do("Handle Attack", AttackTask)
             .End()
             .Build();
+    }
+
+    BehaviorTree DodgingSubTree()
+    {
+        return new BehaviorTreeBuilder(gameObject)
+        .Sequence("Dodge Sequence")
+            .Do("Set Animation", ()=>TriggerAnim(DodgeTrigger))
+            .Do("Await Startup", WaitUntilAnimStart)
+            .Do("Handle Dodge", DodgeTask)
+        .End()
+        .Build();
     }
 
     bool CanAttackCheck()
@@ -149,11 +153,19 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         return permission;
     }
 
-    TaskStatus TriggerAttackAnim()
+    TaskStatus TriggerAnim(string animTrigger)
     {
-        _animator.SetTrigger(LightAttackTrigger);
+        _animator.SetTrigger(animTrigger);
         applyRootMotion = true;
         _attackState = AttackState.Transitioning;
+
+        return TaskStatus.Success;
+    }
+
+    TaskStatus WaitUntilAnimStart()
+    {
+        if (_attackState != AttackState.Startup)
+            return TaskStatus.Continue;
 
         return TaskStatus.Success;
     }
@@ -165,11 +177,38 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
         bool canCombo = _attackState == AttackState.Active || _attackState == AttackState.Cooldown;
 
+        if(_dodgeInput.triggered)
+        {
+            if(_attackState != AttackState.Active && _attackState != AttackState.Startup)
+            {
+                dodgeQueued = true;
+                _tree.Reset();
+                return TaskStatus.Failure;
+            }
+        }
+
         if(RequestedLightAttack() && canCombo)
         {
-            TriggerAttackAnim();
+            TriggerAnim(LightAttackTrigger);
             return TaskStatus.Continue;
         }
+
+        return TaskStatus.Continue;
+    }
+
+    TaskStatus DodgeTask()
+    {
+        if(_attackState == AttackState.Done)
+        {
+            dodgeQueued = false;
+            return TaskStatus.Success;
+        }
+        
+        if (_attackState == AttackState.Startup || _attackState == AttackState.Cooldown)
+            UpdateLookDirection();
+
+        if (_dodgeInput.triggered && _attackState != AttackState.Startup)
+            TriggerAnim(DodgeTrigger);
 
         return TaskStatus.Continue;
     }
@@ -178,7 +217,7 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
     {
         _animator.speed = _animatorSpeed;
 
-        _smoothedInput = Vector2.MoveTowards(_smoothedInput, _currentInput, 0.05f);
+        //_smoothedInput = Vector2.MoveTowards(_smoothedInput, _currentInput, 0.05f);
 
         if (_smoothedInput.magnitude < 0.4f)
             applyRootMotion = false;
@@ -210,12 +249,8 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     bool RequestedLightAttack()
     {
-        if (_lightAttack.triggered)
+        if (_lightAttackInput.triggered)
         {
-            //Start doing the attack animation
-            //_animator.CrossFadeInFixedTime(LightAttack, 0.2f);
-            //var attackAnim = _animator.GetBehaviour<AttackBehaviour>();
-            //attackAnim.IsAttacking = true;
             return true;
         }
         else
@@ -259,12 +294,6 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
     }    
 
     //Helpers
-
-    private void HandleTransposerCam(Vector2 input, CinemachineComponentBase component)
-    {
-        var transposer = component as CinemachineOrbitalTransposer;
-        transposer.m_XAxis.Value = input.x * _lookSensitivity;
-    }
 
     public Vector3 GetWorldSpaceInput(Vector2 controllerInput, Transform relativeTo)
     {
