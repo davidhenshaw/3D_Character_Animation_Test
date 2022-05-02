@@ -177,6 +177,12 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
         bool canCombo = _attackState == AttackState.Active || _attackState == AttackState.Cooldown;
 
+        if(_attackState == AttackState.Startup)
+        {
+            applyRootMotion = true;
+            UpdateLookDirection();
+        }
+
         if(_dodgeInput.triggered)
         {
             if(_attackState != AttackState.Active && _attackState != AttackState.Startup)
