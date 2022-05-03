@@ -26,7 +26,7 @@ public interface IAttackAnimationHandler
     void SetAttackState(AttackState state);
 }
 
-public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementInputHandler, IPlayerAttackHandler, IAttackAnimationHandler
+public class CharacterMovement : MonoBehaviour, IMovementInputHandler, IPlayerAttackHandler, IAttackAnimationHandler
 {
     const string LightAttackTrigger = "lightAttackReq";
     const string DodgeTrigger = "dodgeRequested";
@@ -43,7 +43,6 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
 
     Vector2 _smoothedInput = new Vector2();
     Vector2 _currentInput = new Vector2();
-    Vector2 _cameraInput = new Vector2();
     bool applyRootMotion = true;
     bool dodgeQueued = false;
 
@@ -279,11 +278,6 @@ public class CharacterMovement : MonoBehaviour, ICameraInputHandler, IMovementIn
         {
             //HandleLightAttack();
         }
-    }
-
-    public void OnCameraLook(InputValue input)
-    {
-        _cameraInput = input.Get<Vector2>();
     }
 
     public void OnMovement(InputValue value)

@@ -3978,7 +3978,7 @@ MonoBehaviour:
   m_VerticalAxis:
     Value: 0
     m_SpeedMode: 1
-    m_MaxSpeed: 0.1
+    m_MaxSpeed: 0.07
     m_AccelTime: 0.1
     m_DecelTime: 0.1
     m_InputAxisName: 
@@ -4002,7 +4002,7 @@ MonoBehaviour:
   m_HorizontalAxis:
     Value: 0
     m_SpeedMode: 1
-    m_MaxSpeed: 0.1
+    m_MaxSpeed: 0.07
     m_AccelTime: 0.1
     m_DecelTime: 0.1
     m_InputAxisName: 
@@ -4145,7 +4145,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21688
+  m_Name: pb_Mesh30104
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -4769,7 +4769,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55831d698ddceca4dbf5cbe009a8bc09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _animatorSpeed: 1.25
+  _animatorSpeed: 1.4
   _lightAttackInput:
     m_Name: Light Attack Input
     m_Type: 0
@@ -4878,11 +4878,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vCam: {fileID: 338070761}
-  ySensitivity: 7
-  maxPitch: 65
-  minPitch: -20
-  xSensitivity: 10
-  invertY: 1
+  xSensitivity: 1
+  ySensitivity: 1
 --- !u!4 &1031632035359849168
 Transform:
   m_ObjectHideFlags: 0
